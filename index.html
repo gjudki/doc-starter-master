@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Gadget Meta Data</title>
+  <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/pure-nr-min.css">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+<div class="container">
+  <h1>Gadget Meta Data Schema</h1>
+
+  <p>Creating a common Gadget Meta Data schema gives developers a standard format between the property sheet editor and the consumption of those properties in the gadget. It allows us to control which gadgets allow which properties, and easily define conditional rules around those properties and options.</p>
+
+  <h2>Basic format</h2>
+
+  <p>The following is an example of a blank gadget definition. The gadget definition is an object in an array of objects, so each gadget meta data will be siblings with one another.</p>
+
+  <pre class="code" data-language="html"><code>
+  "GADGET_META_DATA" : [
+    {
+      "type" : "", <i>Type of gadget and unique reference for the gadget, ex: <i>chart, link, clock</i></i>
+      "title" : "", <i>Title of gadget in gadget selector, ex: <i>Chart, Link, Fish Tank</i></i>
+      "icon"	: "", <i>Full icon class from component library or elsewhere, ex: <i>cl-icon-piechart</i></i>
+      "requiresDataSource" : true, <i>True if gadget requires use of the data/query selector</i>
+
+      "properties" : [ <i>A list of the properties a gadget can support</i>
+      {
+        "label" : "", <i>Label or title of property, ex: <i>Title, Timezone, Link Color</i></i>
+        "path" : "", <i>Location of property in gadget object, ex: <i>chart.title, link.color</i></i>
+        "defautValue" : "", <i>The default value or selected option (by value)</i>
+        "type" : "", <i>Changes how this property and inputs options are displayed, ex: <i>thumbnail, text, select, datepicker</i></i>
+        "visible" : boolean / [{}], <i>Accepts boolean value or an array of conditions. See "Toggling Property Visibility and Support"</i>
+        "required" : boolean / [{}], <i>Accepts boolean value or an array of conditions. See "Required Properties"</i>
+        "options" : [ <i>An array of option objects. Duh!</i>
+          {
+            "label" : "",
+            "value" : "",
+            "icon" : "", <i>The property type may or may not support icons for its options</i>
+            "visible" : boolean / [{}], <i>Accepts boolean value or an array of conditions. See "Toggling Property Visibility and Support"</i>
+            "supported" : [] <i>An array of supported conditions. If this property is not set, all checks return true. See "Toggling Property Visibility and Support"</i>
+          }
+        ]
+      }
+    ]
+  }
+]
+
+</code>
+</pre>
+
+<cite>*Note: I will be using the term "key" to indicate the property of an object, to reduce confusion between a property of an object, and the "properties" property (key). A "property" is therefore a child of the "properties" array.</cite>
+
+<h3>Toggling Property Visibility and Support</h3>
+
+A gadget may contain multiple <i>properties</i> or <i>options</i> which are dependent on other <i>properties</i> or <i>options</i>. For example, most chart types will likely support all color themes, but there is a possibility that a chart type like "Gauge", does not support the "color-theme" property at all. This requires two parts:
+<ol>
+  <li>An option, for example the "Gauge" option, needs to be able to indicate which <i>properties</i> or <i>options</i> it supports. We do this by adding a <i>supported</i> key to the option. When <i>supported</i> is blank or true, it is implied that it supports anything which is checking for support. When <i>supported</i> is an array, it supports only the conditions which are implicitly listed in that array.</li>
+  <li>
+    A property or option needs to be able to toggle its visibility based off of conditions set in the <i>supported</i> key of other options. We do this by passing in an array of condition objects into the <i>visible</i> key.
+    <pre class="code"><code>
+"visible" :
+[
+  {
+    "path" : "chart.type"
+    "condition" : "color-theme"
+  },...
+]
+    </code></pre>
+
+    With the above condition set in the <i>visible</i> key, the property would check for a <i>supported</i> array at <i><i>path</i></i>, and validate against the <i><i>condition</i></i>. If multiple conditions are defined in the <i>visible</i> array, it will return false if ANY of the conditions are <i><i><i>false</i></i></i>.
+  </li>
+</ol>
+
+<h3>Required Properties</h3>
+
+<p>A property may or may not be required (true/false), but it may also depend on the value of other properties or options. The <i>required</i> key accepts an array of condition objects, similar to the <i>visible</i> key.</p>
+
+<pre class="code"><code>
+"required" :
+[
+  {
+    "path" : "chart.type"
+    "value" : "pie"
+  },...
+]
+</code></pre>
+
+<p>A property with a <i>required</i> key containing the above condition would only be required if the property or option at path <i><i><i>chart.type</i></i></i> was equal to <i><i><i>pie</i></i></i>. If multiple condition objects are defined in the <i><i>required</i></i> key, It will return true if any condition returns <i><i><i>true</i></i></i>.</p>
+
+</div>
+
+</body>
+</html>
