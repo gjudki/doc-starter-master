@@ -8,8 +8,8 @@ var minifyCss = require('gulp-minify-css');
 gulp.task('sass', function () {
   gulp.src('./sass/**/*.scss')
     .pipe(sass.sync().on('error', sass.logError))
-    .pipe(concatCss("app.css"))
-    .pipe(minifyCss("app.css"))
+    .pipe(concatCss("./app/app.css"))
+    .pipe(minifyCss("./app/app.css"))
     .pipe(gulp.dest('.'));
 });
 
